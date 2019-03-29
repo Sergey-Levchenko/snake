@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" @touchstart="touchstartFunc" @touchend="touchendFunc">
     <transition v-on:after-enter="transitionFunc" name="fade" mode="out-in">
       <div
         key="field"
@@ -7,6 +7,10 @@
         v-if="statedGame"
         :style="`width:${fieldSize}px; height:${fieldSize}px;`"
       >
+        <!-- <div class="nav nav_1"></div>
+        <div class="nav nav_2"></div>
+        <div class="nav nav_3"></div>
+        <div class="nav nav_4"></div>-->
         <div
           v-for="(item,i) in size*size"
           :style="`width:${itemSize}px; height:${itemSize}px;`"
@@ -65,10 +69,10 @@
         </button>
       </div>
     </transition>
+    <!-- <transition name="fade"></transition>
     <transition name="fade"></transition>
     <transition name="fade"></transition>
-    <transition name="fade"></transition>
-    <transition name="fade"></transition>
+    <transition name="fade"></transition>-->
     <div class="score"></div>
     <div :class="[`button-block`,{'right':windowDirection}]">
       <button class="button button_2" @click.prevent="stopGame" v-if="statedGame">
@@ -98,7 +102,9 @@ export default {
       direction: "up",
       action: false,
       crash: false,
-      paused: false
+      paused: false,
+      clientX: null,
+      clientY: null
     };
   },
   computed: {
@@ -118,7 +124,43 @@ export default {
     }
   },
   methods: {
-    
+    touchstartFunc(event) {
+      this.clientX = event.changedTouches["0"].clientX;
+      this.clientY = event.changedTouches["0"].clientY;
+    },
+    touchendFunc(event) {
+      let x = event.changedTouches["0"].clientX;
+      let y = event.changedTouches["0"].clientY;
+      if (this.statedGame &&
+          this.action == false) {
+        if (
+          x - this.clientX > 100 &&
+          Math.abs(this.clientY - y) < 70 &&
+          this.action == false
+        ) {
+          this.direction = "right";
+        } else if (
+          x - this.clientX < -100 &&
+          Math.abs(this.clientY - y) < 70 &&
+          this.action == false
+        ) {
+          this.direction = "left";
+        } else if (
+          y - this.clientY < -100 &&
+          Math.abs(this.clientX - x) < 70 &&
+          this.action == false
+        ) {
+          this.direction = "up";
+        } else if (
+          y - this.clientY > 100 &&
+          Math.abs(this.clientX - x) < 70 &&
+          this.action == false
+        ) {
+          this.direction = "down";
+        }
+        this.action = true;
+      }
+    },
     transitionFunc() {
       if (this.statedGame)
         this.$nextTick(() => {
@@ -171,7 +213,7 @@ export default {
       let items = document.querySelectorAll(`.field__item`);
       let i = 0;
       let endIntrval = setInterval(function() {
-        if (i > this.size*this.size) {
+        if (i > this.size * this.size) {
           clearInterval(endIntrval);
         }
         items[i++].classList.add("end-game");
@@ -280,8 +322,8 @@ export default {
     }
   },
   watch: {
-    end: elem => {
-      // console.log("test - ", elem);
+    action: elem => {
+      console.log("test - ", elem);
     }
   },
   beforeCreate() {},
