@@ -118,7 +118,11 @@ export default {
       return size - (size % this.size);
     },
     end: function() {
-      if (this.crash && !this.paused) this.endFunc();
+      console.log("crash - ", this.crash, "paused - ", this.paused);
+      // if (this.crash && !this.paused) {
+
+      //   this.endFunc();
+      // }
 
       return this.crash && !this.paused;
     }
@@ -131,8 +135,7 @@ export default {
     touchendFunc(event) {
       let x = event.changedTouches["0"].clientX;
       let y = event.changedTouches["0"].clientY;
-      if (this.statedGame &&
-          this.action == false) {
+      if (this.statedGame && this.action == false) {
         if (
           x - this.clientX > 100 &&
           Math.abs(this.clientY - y) < 70 &&
@@ -231,21 +234,23 @@ export default {
       }
     },
     reDrawSnake() {
-      let head = document.querySelector(
-        `.field__item[data-pos-x = '${this.snake[0][0]}'][data-pos-y = '${
-          this.snake[0][1]
-        }']`
-      );
-      head.classList.add("snake-head");
-
-      for (let i = 1; i < this.snake.length; i++) {
-        let body = document.querySelector(
-          `.field__item[data-pos-x = '${this.snake[i][0]}'][data-pos-y = '${
-            this.snake[i][1]
+      this.$nextTick(() => {
+        let head = document.querySelector(
+          `.field__item[data-pos-x = '${this.snake[0][0]}'][data-pos-y = '${
+            this.snake[0][1]
           }']`
         );
-        body.classList.add("snake-body");
-      }
+        head.classList.add("snake-head");
+
+        for (let i = 1; i < this.snake.length; i++) {
+          let body = document.querySelector(
+            `.field__item[data-pos-x = '${this.snake[i][0]}'][data-pos-y = '${
+              this.snake[i][1]
+            }']`
+          );
+          body.classList.add("snake-body");
+        }
+      });
     },
     clearField() {
       let items = document.querySelectorAll(`.field__item`);
@@ -322,9 +327,15 @@ export default {
     }
   },
   watch: {
-    action: elem => {
-      console.log("test - ", elem);
+    end: function (elem) {
+      if ((elem = true)) {
+        console.log("crash - ", elem);
+        this.endFunc()
+      }
     }
+    // paused: elem => {
+    //   // console.log("paused - ", elem);
+    // }
   },
   beforeCreate() {},
   mounted() {
